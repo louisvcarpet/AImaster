@@ -1,11 +1,11 @@
-from MySqlConnector import Mysqlconnector
-from dotenv import load_dotenv
+from mysqlconnector import MySqlConnector
 import pandas as pd
+from dotenv import load_dotenv
 import os
 load_dotenv()
 
 
-connector = Mysqlconnector(
+connector = MySqlConnector(
     host="localhost",
     database="mailroom",
     userN=os.getenv("MYSQL_USER"),
@@ -13,11 +13,10 @@ connector = Mysqlconnector(
 )
 
 connector.connect()
-engine = connector.engine
+
 
 # pandas takecare of mysql database here
-df = pd.read_sql("packages", connector.engine)
-
+df = pd.read_sql("packages",connector.engine)
 
 # filter the user with last name 'Chang' (fixed)
 # print(df[df['recipient_lname']=='Kim'])
@@ -102,13 +101,12 @@ def get_packages_by_size(size):
     from packages
     where size = '{size}'
     """
-    return pd.read_sql(query2.format({'user':size}), engine)
+    return pd.read_sql(query2.format({'user':size}), connector.engine)
 
 df_test = get_packages_by_size(size)
 # print('\n\n\nQuantity of total small packages: ', df_test.shape[0])
 #         #shape[] can be as a counter
 
-   
 
-
+print(df[df['size']=='big'].groupby(['recipient_fname', 'recipient_lname']).size().reset_index(name='total packages'))
 
