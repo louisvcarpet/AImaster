@@ -13,10 +13,11 @@ connector = MySqlConnector(
 )
 
 connector.connect()
+engine = connector.engine
 
 
 # pandas takecare of mysql database here
-df = pd.read_sql("packages",connector.engine)
+df = pd.read_sql("packages",engine)
 
 # filter the user with last name 'Chang' (fixed)
 # print(df[df['recipient_lname']=='Kim'])
