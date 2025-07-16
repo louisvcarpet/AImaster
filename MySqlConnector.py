@@ -16,17 +16,16 @@ class MySqlConnector:
         self.password = password
         self.engine = None
         self.connection = None
-        
-    def connect(self): #call this function to connect the MySQL database
-       try:
+        try:
             # Using the MySQL Connector driver with SQLAlchemy
             engine_url = f"mysql+mysqlconnector://{self.userN}:{self.password}@{self.host}/{self.database}"
             self.engine = create_engine(engine_url)
             self.connection = self.engine.connect()
             # print("Connected to MySQL database using SQLAlchemy")
-       except SQLAlchemyError as e:
+        except SQLAlchemyError as e:
             print("Error while connecting to MySQL:", e)
 
+ 
     def disconnect(self):
         if self.connection:
             self.connection.close()

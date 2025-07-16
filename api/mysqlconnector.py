@@ -17,6 +17,7 @@ class MySqlConnector:
         self.password = password
         self.engine = None
         self.connection = None
+        self.connect()  # Automatically connect on instantiation
         
     def connect(self): #call this function to connect the MySQL database
        try:

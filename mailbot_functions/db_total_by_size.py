@@ -3,10 +3,11 @@ import pandas as pd
 from dotenv import load_dotenv
 from mysqlconnector import MySqlConnector
 import os
+
 load_dotenv()
 
 
-def run(input): # input shld be a dictionary cuz user wont just pass one word as their question
+async def run(input): # input shld be a dictionary cuz user wont just pass one word as their question
     """
     this tool is used for getting the number of packages based on size
     """
@@ -16,7 +17,7 @@ def run(input): # input shld be a dictionary cuz user wont just pass one word as
         userN=os.getenv("MYSQL_USER"),
         password=os.getenv("MYSQL_PASSWORD") 
     )
-    connector.connect()
+
     engine = connector.engine
     df = pd.read_sql("packages", engine)
    
@@ -25,7 +26,7 @@ def run(input): # input shld be a dictionary cuz user wont just pass one word as
             size_value = size
             break
     else:
-        return "Result: No valid size found in the request."
+        return"Result: No valid size found in the request."
 
     # count the number of packages by size
     # print(f"\nTotal number of {input} packages for each resident: ")
@@ -34,5 +35,5 @@ def run(input): # input shld be a dictionary cuz user wont just pass one word as
     return result_str
 
 
-# print(run("how many big packages do the mailroom contain "))
+# print(run("how many medium packages do the mailroom contain "))
 # print("Jgbjekabguibvuwbi")
