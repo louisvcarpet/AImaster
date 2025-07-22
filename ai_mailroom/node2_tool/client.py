@@ -13,6 +13,7 @@ import re
 import json
 from collections import namedtuple
 from langchain_core.prompts import ChatPromptTemplate
+from state import MailRoomState
 
 
 ToolCall = namedtuple("ToolCall", ["name", "input"])
@@ -25,6 +26,8 @@ class MCPClient:
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
+      
+        
         
 
 
@@ -57,28 +60,24 @@ class MCPClient:
         await self.session.initialize()
 
 
-    async def chat_loop(self):
-        """Run an interactive chat loop"""
-        print("\nMCP Client Started!")
-        print("Type your queries or 'quit' to exit.")
+    # async def chat_loop(self, state: MailRoomState):
+    #     """Run an interactive chat loop"""
+    #     print("\nMCP Client Started!")
+    #     print("Type your queries or 'quit' to exit.")
 
-        while True:
-            try:
-                query = input("\nQuery: ").strip()
+    #     # while True:
+    #     #     try:
 
-                if query.lower() == 'quit':
-                    break
+    #     response = await self.process_query(state.user_input)
+    #         #     print("\n" + response)
 
-                response = await self.process_query(query)
-                print("\n" + response)
+    #         # except Exception as e:
+    #         #     print(f"\nError: {str(e)}")
 
-            except Exception as e:
-                print(f"\nError: {str(e)}")
-
-    async def call_tool(self, tool_name: str, tool_args: dict):
-        pass
+    # async def call_tool(self, tool_name: str, tool_args: dict):
+    #     pass
     
-    async def process_query(self, query: str) -> str:
+    async def process_query(self, state: MailRoomState) -> str:
   
         llm_creator = GetLLM(provider="openai")
         llm = llm_creator.get_llm()
@@ -104,7 +103,7 @@ class MCPClient:
                 ("human", "{query}")
              ])
         chain = prompt| llm_with_tools
-        output = await chain.ainvoke({"query", query})
+        output = await chain.ainvoke({"query", state.user_input})
 
 
         if output.tool_calls:
@@ -113,7 +112,12 @@ class MCPClient:
             tool_args = tool_call['args']
             tool_result = await self.session.call_tool(tool_name, tool_args)
 
-        return tool_result.content[0].text
+            state.result = tool_result.content[0].text 
+            state.tryout = 1 if state.tryout is None else state.tryout + 1
+        
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nTHE RESULT IS:", state.result)
+
+        return state
 
 
     async def cleanup(self):
@@ -121,104 +125,30 @@ class MCPClient:
         await self.exit_stack.aclose()
 
 
-async def main():
-    
-    if len(sys.argv) < 2:
-        print(f"Usage: python client.py <path_to_server_script>")
-        sys.exit(1)
 
-    client = MCPClient()
-    client.process_query(query = state.user_input)
-    try:
-        print(f"The tool path:{sys.argv[1]}")
+
+    async def __call__(self, state: MailRoomState):
+        """Run the client with the provided state"""
         
-        await client.connect_to_server(sys.argv[1])
-        print("Connected to MCP server successfully!")
+        try:
+            # # print(f"The tool path:{"ai_mailroom/node2_tool/mcpserver.py"}")
         
-        await client.chat_loop()
-        print("that's all folks!")
-      
-    finally:
-        await client.cleanup()
+            await self.connect_to_server("mcpserver.py")
+            # print("Connected to MCP server successfully!")
+            await  self.process_query(state) 
+            # await self.chat_loop()
+            # print("that's all folks!")
+        
+        finally:
+            await self.cleanup()
+        print(state.result)
+        return state
+
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    # Example usage
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-#   async def process_query(self, query: str) -> str:
-        
-#         """Process a query using ChatGPT and available tools"""
-#         messages = [
-#             {
-#                 "role": "user",
-#                 "content": query
-#             }
-#         ]
-
-#         response = await self.session.list_tools()
-#         available_tools = [{ 
-#             "name": tool.name,
-#             "description": tool.description,
-#             "input_schema": tool.inputSchema
-#         } for tool in response.tools]
-      
-# ###############################################################
-#         llm = LLMBase()
-
-#         # Initial Claude API call
-#         response = await llm.ainvoke(query)
-# ###############################################################
-#         # Process response and handle tool calls
-#         tool_results = []
-#         final_text = []
-
-#         for content in response.content:
-#             if content.type == 'text':
-#                 final_text.append(content.text)
-#             elif content.type == 'tool_use':
-#                 tool_name = content.name
-#                 tool_args = content.input
-
-#                 # Execute tool call
-#                 result = await self.session.call_tool(tool_name, tool_args)
-#                 tool_results.append({"call": tool_name, "result": result})
-#                 final_text.append(f"[Calling tool {tool_name} with args {tool_args}]")
-
-#                 # Continue conversation with tool results
-#                 if hasattr(content, 'text') and content.text:
-#                     messages.append({
-#                     "role": "assistant",
-#                     "content": content.text
-#                     })
-#                 messages.append({
-#                     "role": "user", 
-#                     "content": result.content
-#                 })
-
-#                 # Get next response from Claude
-#                 response = self.anthropic.messages.create(
-#                     model="claude-3-5-sonnet-20241022",
-#                     max_tokens=1000,
-#                     messages=messages,
-#                 )
-
-#                 final_text.append(response.content[0].text)
-
-#         return "\n".join(final_text)
+    state = MailRoomState(user_input="How many big packages does the mailroom have?")
+    client = MCPClient()
+    asyncio.run(client(state))

@@ -2,6 +2,7 @@ from ai_mailroom.myllm import GetLLM
 from ai_mailroom.node1_filter.request_prompt import FILTER_PROMPT 
 from langchain_core.prompts import ChatPromptTemplate
 import asyncio
+from state import MailRoomState
 
 class MailRoomChatBot(GetLLM):
 
@@ -9,7 +10,7 @@ class MailRoomChatBot(GetLLM):
         super().__init__(prompt=prompt)
         self.llm = self.get_llm()
 
-    async def mailbot(self, state):
+    async def run(self, state: MailRoomState):
         # llm = LlmBase()
         # answer = llm.ainvoke({UserInput})
         # return answer 
@@ -22,6 +23,9 @@ class MailRoomChatBot(GetLLM):
         chain = prompt_template | self.llm
 
         user_input = input("Hi I'm your Mailbot, how can I help you today?\n User Query: ")
+        # user_input = "give me the total amount of big packages in the mailroom"
+        # user_input = "give me the total amount of packages for Frank Lin the mailroom"
+        state.user_input = user_input
     
         # formatted_prompt = prompt.format(user_request=UserInput)
     
@@ -32,11 +36,10 @@ class MailRoomChatBot(GetLLM):
             user_input = input("Sorry I can only answer questions related to the mailroom information. Please ask again.\n User Query: ")
             answer = await chain.ainvoke({"user_request": user_input})
         print(answer.content)
-        return answer
+        return state 
 
+    async def __call__(self, state):
+        return await self.run(state)
     
     # mailbot("How many big packages does the mailroom have")
 
-thebot = MailRoomChatBot(prompt=FILTER_PROMPT)
-
-asyncio.run(thebot.mailbot())

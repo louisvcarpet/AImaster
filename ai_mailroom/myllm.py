@@ -16,7 +16,7 @@ class GetLLM:
     A class to get an instance of the LLM based on the provider.
     """
     
-    def __init__(self, provider, prompt = None):
+    def __init__(self, provider ="openai", prompt = None):
         self.provider = provider
         self.prompt = prompt
 

@@ -34,6 +34,8 @@ async def run(input): # input shld be a dictionary cuz user wont just pass one w
     result_str = df_size_count.to_string(index=False)
     return result_str
 
-
-# print(run("how many medium packages do the mailroom contain "))
-# print("Jgbjekabguibvuwbi")
+if __name__ == "__main__":
+    import asyncio
+    input_data = {"user_input": "How many big packages does the mailroom have?"}
+    result = asyncio.run(run(input_data))
+    print(result)
