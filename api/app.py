@@ -1,6 +1,6 @@
 from fastapi import FastAPI #FastAPI is a Python class that provides all the functionality for your API.
 from enum import Enum 
-
+from datetime import datetime
 class ModelName(str, Enum):
     alexnet = "alexnet"
     resnet = "resnet"
@@ -149,8 +149,7 @@ connector = MySqlConnector(
     password=os.getenv("MYSQL_PASSWORD") 
 )
 
-connector.connect()
-engine = connector.engine
+
 
 # pandas takecare of mysql database here
 df = pd.read_sql("packages", connector.engine)
@@ -219,9 +218,9 @@ print(df)
 
 
 
-# if __name__ == "__main__":
-#     import uvicorn
-#     uvicorn.run(app, host="0.0.0.0", port=8060)
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8060)
 
 # class main():
 #     app = FastAPI()
