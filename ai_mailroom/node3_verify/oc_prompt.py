@@ -1,5 +1,7 @@
 CHECKER_PROMPT = """ Your only job is to verify whethe state variable 'result'
- and correctly answer the  state variable 'user_input' according to my mailroom service.
+ and correctly answer the  state variable 'user_input' according to my mailroom service. 
+
+ *** if the 'user_query' is related to any form of package creation such as help me to add/create/register a package, you must return "yes" if the 'result' has "Package created successfully".
 
 Case A: 
 for example, if the 'User_query' is "How many big packages does the mailroom have?" and the 'Result' is "There are 5 big packages in the mailroom.", then you should return "yes" because the result correctly answers the user input query.

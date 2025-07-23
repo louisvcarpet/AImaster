@@ -10,6 +10,7 @@ from ai_mailroom.node3_verify.output_checker import CHECKER_PROMPT
 from ai_mailroom.node2_tool.client_prompt import CLIENTPROMPT
 import asyncio
 
+
 def router(state: MailRoomState):
     """
     Router function to determine the next node based on the output checker state.
@@ -29,9 +30,9 @@ def router(state: MailRoomState):
         return "client"
     # return END
     
-async def mailbot():
+async def mailbot(user_input: str):
 
-    chatNode  = MailRoomChatBot(prompt=FILTER_PROMPT)
+    chatNode  = MailRoomChatBot(prompt=FILTER_PROMPT, user_input=user_input)
     clientNode = MCPClient(prompt =CLIENTPROMPT)
     checkerNode = OutputChecker(prompt=CHECKER_PROMPT)
     displayNode = testDisplay()
@@ -55,11 +56,10 @@ async def mailbot():
     # workflow.set_finish_point(END)  # <-- Add this line
     workflow.add_edge("display", END)
    
-
     mailroom  = workflow.compile()
-    await mailroom.ainvoke(MailRoomState(user_input=""))
+    return await mailroom.ainvoke(MailRoomState(user_input=user_input))
     
 
 if __name__ == "__main__":
-    asyncio.run(mailbot())
+    asyncio.run(mailbot("help me to add a package for Sean Chang, the type is box and the size is big"))
 

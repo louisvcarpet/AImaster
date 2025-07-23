@@ -6,9 +6,10 @@ from state import MailRoomState
 
 class MailRoomChatBot(GetLLM):
 
-    def __init__(self, prompt):
+    def __init__(self, prompt, user_input:str):
         super().__init__(prompt=prompt)
         self.llm = self.get_llm()
+        self.user_input = user_input
 
     async def run(self, state: MailRoomState):
         # llm = LlmBase()
@@ -22,20 +23,19 @@ class MailRoomChatBot(GetLLM):
 
         chain = prompt_template | self.llm
 
-        user_input = input("Hi I'm your Mailbot, how can I help you today?\n User Query: ")
-        # user_input = "give me the total amount of big packages in the mailroom"
-        # user_input = "give me the total amount of packages for Frank Lin the mailroom"
-        state.user_input = user_input
+        # user_input = input("Hi I'm your Mailbot, how can I help you today?\n User Query: ")
+       
+        state.user_input = self.user_input
     
         # formatted_prompt = prompt.format(user_request=UserInput)
     
-        answer = await chain.ainvoke({"user_request": user_input})
+        answer = await chain.ainvoke({"user_request": state.user_input})
 
         #use y/n for condition checking 
-        while(answer.content == "Sorry I can only answer questions related to the mailroom information."):
-            user_input = input("Sorry I can only answer questions related to the mailroom information. Please ask again.\n User Query: ")
-            answer = await chain.ainvoke({"user_request": user_input})
-        print(answer.content)
+        # while(answer.content == "Sorry I can only answer questions related to the mailroom information."):
+        #     user_input = input("Sorry I can only answer questions related to the mailroom information. Please ask again.\n User Query: ")
+        #     answer = await chain.ainvoke({"user_request": user_input})
+        # print(answer.content)
         return state 
 
     async def __call__(self, state):

@@ -1,8 +1,8 @@
 import streamlit as st
 import asyncio
-from officialRun import mailbot  # Import the async function from officialRun.py
 from state import MailRoomState
-
+from officialRun import mailbot  # Import the async function from officialRun.py
+  # Run the async function to get the mailbot instance
 
 
 # --- Custom CSS for a modern tech vibe ---
@@ -59,13 +59,13 @@ st.set_page_config(page_title="AI Mailroom Chatbot", page_icon=":robot_face:", l
 # Use session state to store output
 if "mailroom_output" not in st.session_state:
     st.session_state["mailroom_output"] = None
+    st.session_state.page = "Ask Mailroom AI"
+# # Sidebar navigation
+# page = st.sidebar.radio("Navigation", ["Ask Mailroom AI", "View Output"], index=0)
 
-# Sidebar navigation
-page = st.sidebar.radio("Navigation", ["Ask Mailroom AI", "View Output"], index=0)
-
-if page == "Ask Mailroom AI":
+if st.session_state.page == "Ask Mailroom AI":
     st.markdown('<div class="big-title">AI Mailroom Chatbot</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Welcome to your futuristic mailroom assistant. Ask anything about your packages, deliveries, or mailroom operations!</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Welcome to your futuristic mailroom assistant invented by BlakeC. Ask anything about your packages, deliveries, or mailroom operations!</div>', unsafe_allow_html=True)
 
     with st.form("ask_form"):
         # st.markdown('<div class="question-box">', unsafe_allow_html=True)x
@@ -79,19 +79,27 @@ if page == "Ask Mailroom AI":
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
             # You may need to adjust this depending on your teset() signature
-            result = loop.run_until_complete(
-                teset(MailRoomState(user_input=user_input))
+            finalState: MailRoomState = loop.run_until_complete(
+                 mailbot(user_input)
             )
-            st.session_state["mailroom_output"] = result
-        st.success("Your question has been processed! Go to 'View Output' to see the answer.")
+            st.session_state["mailroom_output"] = finalState.get("result", "No result available.")
+        # st.success("Your question has been processed! Go to 'View Output' to see the answer.")
+        st.session_state.page = "View Output"
+        st.rerun()  # Refresh the page to show the output
+     
+      # Refresh the page to show the output
+     
 
-elif page == "View Output":
-    st.markdown('<div class="big-title">Mailroom AI Output</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Here is the latest response from your AI Mailroom assistant:</div>', unsafe_allow_html=True)
+elif st.session_state.page ==  "View Output":
+    if st.button("Back to Main"):
+            st.session_state.page = "Ask Mailroom AI"
+            st.rerun()
+    st.markdown('<div class="big-title"> Result: </div>', unsafe_allow_html=True)
+    # st.markdown('<div class="subtitle">Here is the latest response from your AI Mailroom assistant:</div>', unsafe_allow_html=True)
     output = st.session_state.get("mailroom_output")
     if output:
         # You may need to adjust this depending on your MailRoomState/result structure
-        st.markdown(f'<div class="result-box">{output.result if hasattr(output, "result") else output}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="result-box">{output if hasattr(output, "result") else output}</div>', unsafe_allow_html=True)
     else:
         st.info("No output yet. Please ask a question on the first page.")
 
