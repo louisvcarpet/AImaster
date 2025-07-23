@@ -14,6 +14,7 @@ import json
 from collections import namedtuple
 from langchain_core.prompts import ChatPromptTemplate
 from state import MailRoomState
+from ai_mailroom.node2_tool.client_prompt import CLIENTPROMPT
 
 
 ToolCall = namedtuple("ToolCall", ["name", "input"])
@@ -21,17 +22,14 @@ ToolCall = namedtuple("ToolCall", ["name", "input"])
 class MCPClient:
 
 
-    def __init__(self):
+    def __init__(self, prompt):
         # Initialize session and client objects
         self.session: Optional[ClientSession] = None
         self.exit_stack = AsyncExitStack()
         self.anthropic = Anthropic()
+        self.prompt = prompt
       
-        
-        
 
-
-    # methods will go here
 
 
     async def connect_to_server(self, server_script_path: str):
@@ -58,24 +56,6 @@ class MCPClient:
         self.session = await self.exit_stack.enter_async_context(ClientSession(self.stdio, self.write))
 
         await self.session.initialize()
-
-
-    # async def chat_loop(self, state: MailRoomState):
-    #     """Run an interactive chat loop"""
-    #     print("\nMCP Client Started!")
-    #     print("Type your queries or 'quit' to exit.")
-
-    #     # while True:
-    #     #     try:
-
-    #     response = await self.process_query(state.user_input)
-    #         #     print("\n" + response)
-
-    #         # except Exception as e:
-    #         #     print(f"\nError: {str(e)}")
-
-    # async def call_tool(self, tool_name: str, tool_args: dict):
-    #     pass
     
     async def process_query(self, state: MailRoomState) -> str:
   
@@ -97,12 +77,11 @@ class MCPClient:
         ]
         llm_with_tools = llm.bind_tools(openai_tools)
 
-        prompt = ChatPromptTemplate.from_messages(
-            [(
-                "system", "only use tools to answer the question, don't answer the question directly"),
-                ("human", "{query}")
-             ])
-        chain = prompt| llm_with_tools
+        prompt_template = ChatPromptTemplate.from_messages([
+    ('system', self.prompt),
+    ('human', "{query}")
+    ])
+        chain = prompt_template| llm_with_tools
         output = await chain.ainvoke({"query", state.user_input})
 
 
@@ -115,7 +94,7 @@ class MCPClient:
             state.result = tool_result.content[0].text 
             state.tryout = 1 if state.tryout is None else state.tryout + 1
         
-        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nTHE RESULT IS:", state.result)
+        # print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\nTHE RESULT IS:", state.result)
 
         return state
 
@@ -149,6 +128,6 @@ class MCPClient:
 if __name__ == "__main__":
     # Example usage
 
-    state = MailRoomState(user_input="How many big packages does the mailroom have?")
-    client = MCPClient()
+    state = MailRoomState(user_input="How many packeages does sean chang have?")
+    client = MCPClient(prompt = CLIENTPROMPT)
     asyncio.run(client(state))
