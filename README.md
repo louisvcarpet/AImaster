@@ -21,16 +21,32 @@ go to Preference open workspace setting JSON and type:
  -->
 
 
+AI End-to-End Mailroom System
 
- - "How many packages has Rachel Chang received?"
-- "Who has the most small packages?"
-- "Give me a list of everyone who received big packages."
-- "Does John Chang have anything in the mailroom?"
-- "Which size of package is most frequently delivered?"
-- "Compare the number of packages between Rachel and Tina."
-- "Summarize who received what kind of packages today."
+An agentic AI-driven mailroom automation platform integrating LLM reasoning, StateGraph orchestration, MCP client/agent communication, tool calling, and a MySQL database — seamlessly passing processed orders to a hardware control system for execution.
+
+This project demonstrates a full pipeline from natural language task intake → intelligent parsing → database storage → decision-making → hardware dispatch.
 
 
-1. `db_packages_by_same_user.py:
-    - Returns the total number of packages each resident has received.
-    - Output: A table with columns [recipient_fname, recipient_lname, total packages].
+🚀 Features
+
+LLM-Powered Processing
+Uses Large Language Models for natural language understanding, intent detection, and order parsing.
+
+StateGraph Workflow Orchestration
+Encapsulates mailroom logic into a graph-based state machine for predictable, maintainable flows.
+
+MCP Client/Agent Communication
+Handles multi-step, context-aware communication between AI agents and connected hardware controllers.
+
+Tool Calling & Function Execution
+Dynamically triggers custom tools (database operations, validation, hardware commands) from LLM outputs.
+
+MySQL Integration
+Stores and retrieves structured order data for persistence and auditability.
+
+Hardware Dispatch Layer
+Passes validated instructions to the physical mailroom hardware system for execution.
+
+End-to-End Automation
+From receiving requests → AI decision-making → final physical action.
